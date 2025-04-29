@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin Home</title>
+<title>Trang quản trị</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet"
@@ -25,13 +25,13 @@
 
 	if (userType == null || !userType.equals("admin")) {
 
-		response.sendRedirect("login.jsp?message=Access Denied, Login as admin!!");
+		response.sendRedirect("login.jsp?message=Truy cập bị từ chối, vui lòng đăng nhập với tư cách quản trị viên!!");
 
 	}
 
 	else if (userName == null || password == null) {
 
-		response.sendRedirect("login.jsp?message=Session Expired, Login Again!!");
+		response.sendRedirect("login.jsp?message=Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!!");
 
 	}
 	%>
@@ -42,20 +42,20 @@
 
 		<div class="tab" align="center">
 			<form>
-				<button type="submit" formaction="adminViewProduct.jsp">View
-					products</button>
+				<button type="submit" formaction="adminViewProduct.jsp">Xem
+					sản phẩm</button>
 				<br>
 				<br>
-				<button type="submit" formaction="addProduct.jsp">Add
-					products</button>
+				<button type="submit" formaction="addProduct.jsp">Thêm
+					sản phẩm</button>
 				<br>
 				<br>
-				<button type="submit" formaction="removeProduct.jsp">Remove
-					Products</button>
+				<button type="submit" formaction="removeProduct.jsp">Xóa
+					sản phẩm</button>
 				<br>
 				<br>
-				<button type="submit" formaction="updateProductById.jsp">Update
-					Products</button>
+				<button type="submit" formaction="updateProductById.jsp">Cập nhật
+					sản phẩm</button>
 				<br>
 				<br>
 			</form>

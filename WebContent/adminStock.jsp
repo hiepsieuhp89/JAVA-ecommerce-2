@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Product Stocks</title>
+<title>Kho hàng</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet"
@@ -25,13 +25,13 @@
 
 	if (userType == null || !userType.equals("admin")) {
 
-		response.sendRedirect("login.jsp?message=Access Denied, Login as admin!!");
+		response.sendRedirect("login.jsp?message=Truy cập bị từ chối, vui lòng đăng nhập với tư cách quản trị viên!!");
 
 	}
 
 	else if (userName == null || password == null) {
 
-		response.sendRedirect("login.jsp?message=Session Expired, Login Again!!");
+		response.sendRedirect("login.jsp?message=Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!!");
 
 	}
 	%>
@@ -39,22 +39,22 @@
 	<jsp:include page="header.jsp" />
 
 	<div class="text-center"
-		style="color: green; font-size: 24px; font-weight: bold;">Stock
-		Products</div>
+		style="color: green; font-size: 24px; font-weight: bold;">Kho
+		hàng</div>
 	<div class="container-fluid">
 		<div class="table-responsive ">
 			<table class="table table-hover table-sm">
 				<thead
 					style="background-color: #2c6c4b; color: white; font-size: 18px;">
 					<tr>
-						<th>Image</th>
-						<th>ProductId</th>
-						<th>Name</th>
-						<th>Type</th>
-						<th>Price</th>
-						<th>Sold Qty</th>
-						<th>Stock Qty</th>
-						<th colspan="2" style="text-align: center">Actions</th>
+						<th>Hình ảnh</th>
+						<th>Mã sản phẩm</th>
+						<th>Tên</th>
+						<th>Loại</th>
+						<th>Giá</th>
+						<th>Đã bán</th>
+						<th>Số lượng trong kho</th>
+						<th colspan="2" style="text-align: center">Thao tác</th>
 					</tr>
 				</thead>
 				<tbody style="background-color: white; font-size: 16px;">
@@ -86,14 +86,14 @@
 							<form method="post">
 								<button type="submit"
 									formaction="updateProduct.jsp?prodid=<%=product.getProdId()%>"
-									class="btn btn-primary">Update</button>
+									class="btn btn-primary">Cập nhật</button>
 							</form>
 						</td>
 						<td>
 							<form method="post">
 								<button type="submit"
 									formaction="./RemoveProductSrv?prodid=<%=product.getProdId()%>"
-									class="btn btn-danger">Remove</button>
+									class="btn btn-danger">Xóa</button>
 							</form>
 						</td>
 
@@ -106,8 +106,8 @@
 					if (products.size() == 0) {
 					%>
 					<tr style="background-color: grey; color: white;">
-						<td colspan="7" style="text-align: center;">No Items
-							Available</td>
+						<td colspan="7" style="text-align: center;">Không có sản phẩm
+							nào</td>
 
 					</tr>
 					<%

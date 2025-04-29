@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>View Products</title>
+<title>Xem sản phẩm</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet"
@@ -17,93 +17,109 @@
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 </head>
 <body style="background-color: #E6F9E6;">
-
 	<%
 	/* Checking the user credentials */
+	String userType = (String) session.getAttribute("usertype");
 	String userName = (String) session.getAttribute("username");
 	String password = (String) session.getAttribute("password");
-	String userType = (String) session.getAttribute("usertype");
 
 	if (userType == null || !userType.equals("admin")) {
 
-		response.sendRedirect("login.jsp?message=Access Denied, Login as admin!!");
+		response.sendRedirect("login.jsp?message=Truy cập bị từ chối, vui lòng đăng nhập với tư cách quản trị viên!!");
 
 	}
 
 	else if (userName == null || password == null) {
 
-		response.sendRedirect("login.jsp?message=Session Expired, Login Again!!");
+		response.sendRedirect("login.jsp?message=Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!!");
 
-	}
-	ProductServiceImpl prodDao = new ProductServiceImpl();
-	List<ProductBean> products = new ArrayList<ProductBean>();
-
-	String search = request.getParameter("search");
-	String type = request.getParameter("type");
-	String message = "All Products";
-	if (search != null) {
-		products = prodDao.searchAllProducts(search);
-		message = "Showing Results for '" + search + "'";
-	} else if (type != null) {
-		products = prodDao.getAllProductsByType(type);
-		message = "Showing Results for '" + type + "'";
-	} else {
-		products = prodDao.getAllProducts();
-	}
-	if (products.isEmpty()) {
-		message = "No items found for the search '" + (search != null ? search : type) + "'";
-		products = prodDao.getAllProducts();
 	}
 	%>
-
-
 
 	<jsp:include page="header.jsp" />
 
 	<div class="text-center"
-		style="color: black; font-size: 14px; font-weight: bold;"><%=message%></div>
-	<!-- Start of Product Items List -->
-	<div class="container" style="background-color: #E6F9E6;">
-		<div class="row text-center">
+		style="color: green; font-size: 24px; font-weight: bold;">Danh sách
+		sản phẩm</div>
+	<div class="container-fluid">
+		<div class="table-responsive ">
+			<table class="table table-hover table-sm">
+				<thead
+					style="background-color: #2c6c4b; color: white; font-size: 18px;">
+					<tr>
+						<th>Hình ảnh</th>
+						<th>Mã sản phẩm</th>
+						<th>Tên</th>
+						<th>Loại</th>
+						<th>Giá</th>
+						<th>Số lượng trong kho</th>
+						<th colspan="2" style="text-align: center">Thao tác</th>
+					</tr>
+				</thead>
+				<tbody style="background-color: white; font-size: 16px;">
 
-			<%
-			for (ProductBean product : products) {
-			%>
-			<div class="col-sm-4" style='height: 350px;'>
-				<div class="thumbnail">
-					<img src="./ShowImage?pid=<%=product.getProdId()%>" alt="Product"
-						style="height: 150px; max-width: 180px;">
-					<p class="productname"><%=product.getProdName()%>
-						(
-						<%=product.getProdId()%>
-						)
-					</p>
-					<p class="productinfo"><%=product.getProdInfo()%></p>
-					<p class="price">
-						Rs
-						<%=product.getProdPrice()%>
-					</p>
-					<form method="post">
-						<button type="submit"
-							formaction="./RemoveProductSrv?prodid=<%=product.getProdId()%>"
-							class="btn btn-danger">Remove Product</button>
-						&nbsp;&nbsp;&nbsp;
-						<button type="submit"
-							formaction="updateProduct.jsp?prodid=<%=product.getProdId()%>"
-							class="btn btn-primary">Update Product</button>
-					</form>
-				</div>
-			</div>
 
-			<%
-			}
-			%>
 
+					<%
+					ProductServiceImpl productDao = new ProductServiceImpl();
+					List<ProductBean> products = new ArrayList<ProductBean>();
+					String type = request.getParameter("type");
+					if (type == null)
+						products = productDao.getAllProducts();
+					else
+						products = productDao.getAllProductsByType(type);
+					for (ProductBean product : products) {
+					%>
+
+					<tr>
+						<td><img src="./ShowImage?pid=<%=product.getProdId()%>"
+							style="width: 50px; height: 50px;"></td>
+						<td><a
+							href="./updateProduct.jsp?prodid=<%=product.getProdId()%>"><%=product.getProdId()%></a></td>
+						<%
+						String name = product.getProdName();
+						name = name.substring(0, Math.min(name.length(), 25)) + "..";
+						%>
+						<td><%=name%></td>
+						<td><%=product.getProdType().toUpperCase()%></td>
+						<td><%=product.getProdPrice()%></td>
+						<td><%=product.getProdQuantity()%></td>
+						<td>
+							<form method="post">
+								<button type="submit"
+									formaction="updateProduct.jsp?prodid=<%=product.getProdId()%>"
+									class="btn btn-primary">Cập nhật</button>
+							</form>
+						</td>
+						<td>
+							<form method="post">
+								<button type="submit"
+									formaction="./RemoveProductSrv?prodid=<%=product.getProdId()%>"
+									class="btn btn-danger">Xóa</button>
+							</form>
+						</td>
+
+					</tr>
+
+					<%
+					}
+					%>
+					<%
+					if (products.size() == 0) {
+					%>
+					<tr style="background-color: grey; color: white;">
+						<td colspan="7" style="text-align: center;">Không có sản phẩm
+							nào</td>
+
+					</tr>
+					<%
+					}
+					%>
+				</tbody>
+			</table>
 		</div>
 	</div>
-	<!-- ENd of Product Items List -->
 
 	<%@ include file="footer.html"%>
-
 </body>
 </html>
