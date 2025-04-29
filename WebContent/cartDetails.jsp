@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Cart Details</title>
+<title>Giỏ hàng</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet"
@@ -15,153 +15,124 @@
 	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
-<link rel="stylesheet"
-	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body style="background-color: #E6F9E6;">
-
 	<%
 	/* Checking the user credentials */
+	String userType = (String) session.getAttribute("usertype");
 	String userName = (String) session.getAttribute("username");
 	String password = (String) session.getAttribute("password");
 
-	if (userName == null || password == null) {
+	if (userType == null || !userType.equals("customer")) {
 
-		response.sendRedirect("login.jsp?message=Session Expired, Login Again!!");
+		response.sendRedirect("login.jsp?message=Truy cập bị từ chối, vui lòng đăng nhập với tư cách khách hàng!!");
 
 	}
 
-	String addS = request.getParameter("add");
-	if (addS != null) {
+	else if (userName == null || password == null) {
 
-		int add = Integer.parseInt(addS);
-		String uid = request.getParameter("uid");
-		String pid = request.getParameter("pid");
-		int avail = Integer.parseInt(request.getParameter("avail"));
-		int cartQty = Integer.parseInt(request.getParameter("qty"));
-		CartServiceImpl cart = new CartServiceImpl();
+		response.sendRedirect("login.jsp?message=Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!!");
 
-		if (add == 1) {
-			//Add Product into the cart
-			cartQty += 1;
-			if (cartQty <= avail) {
-		cart.addProductToCart(uid, pid, 1);
-			} else {
-		response.sendRedirect("./AddtoCart?pid=" + pid + "&pqty=" + cartQty);
-			}
-		} else if (add == 0) {
-			//Remove Product from the cart
-			cart.removeProductFromCart(uid, pid);
-		}
 	}
 	%>
-
-
 
 	<jsp:include page="header.jsp" />
 
 	<div class="text-center"
-		style="color: green; font-size: 24px; font-weight: bold;">Cart
-		Items</div>
-	<!-- <script>document.getElementById('mycart').innerHTML='<i data-count="20" class="fa fa-shopping-cart fa-3x icon-white badge" style="background-color:#333;margin:0px;padding:0px; margin-top:5px;"></i>'</script>
- -->
-	<!-- Start of Product Items List -->
-	<div class="container">
-
-		<table class="table table-hover">
-			<thead
-				style="background-color: #186188; color: white; font-size: 16px; font-weight: bold;">
-				<tr>
-					<th>Picture</th>
-					<th>Products</th>
-					<th>Price</th>
-					<th>Quantity</th>
-					<th>Add</th>
-					<th>Remove</th>
-					<th>Amount</th>
-				</tr>
-			</thead>
-			<tbody
-				style="background-color: white; font-size: 15px; font-weight: bold;">
+		style="color: green; font-size: 24px; font-weight: bold;">Giỏ hàng</div>
+	<div class="container-fluid">
+		<div class="table-responsive ">
+			<table class="table table-hover table-sm">
+				<thead
+					style="background-color: #2c6c4b; color: white; font-size: 18px;">
+					<tr>
+						<th>Hình ảnh</th>
+						<th>Mã sản phẩm</th>
+						<th>Tên</th>
+						<th>Loại</th>
+						<th>Giá</th>
+						<th>Số lượng</th>
+						<th>Tổng tiền</th>
+						<th style="text-align: center">Thao tác</th>
+					</tr>
+				</thead>
+				<tbody style="background-color: white; font-size: 16px;">
 
 
 
-				<%
-				CartServiceImpl cart = new CartServiceImpl();
-				List<CartBean> cartItems = new ArrayList<CartBean>();
-				cartItems = cart.getAllCartItems(userName);
-				double totAmount = 0;
-				for (CartBean item : cartItems) {
+					<%
+					CartServiceImpl cartDao = new CartServiceImpl();
+					List<CartBean> carts = new ArrayList<CartBean>();
+					carts = cartDao.getAllCartItems(userName);
+					double total = 0.0;
+					for (CartBean cart : carts) {
+						ProductBean product = new ProductServiceImpl().getProductDetails(cart.getProductId());
+						total += (product.getProdPrice() * cart.getQuantity());
+					%>
 
-					String prodId = item.getProdId();
+					<tr>
+						<td><img src="./ShowImage?pid=<%=product.getProdId()%>"
+							style="width: 50px; height: 50px;"></td>
+						<td><%=product.getProdId()%></td>
+						<%
+						String name = product.getProdName();
+						name = name.substring(0, Math.min(name.length(), 25)) + "..";
+						%>
+						<td><%=name%></td>
+						<td><%=product.getProdType().toUpperCase()%></td>
+						<td><%=product.getProdPrice()%></td>
+						<td><%=cart.getQuantity()%></td>
+						<td><%=product.getProdPrice() * cart.getQuantity()%></td>
+						<td>
+							<form method="post">
+								<button type="submit"
+									formaction="./RemoveFromCart?cartid=<%=cart.getCartId()%>"
+									class="btn btn-danger">Xóa</button>
+							</form>
+						</td>
 
-					int prodQuantity = item.getQuantity();
+					</tr>
 
-					ProductBean product = new ProductServiceImpl().getProductDetails(prodId);
+					<%
+					}
+					%>
+					<%
+					if (carts.size() == 0) {
+					%>
+					<tr style="background-color: grey; color: white;">
+						<td colspan="8" style="text-align: center;">Giỏ hàng trống</td>
 
-					double currAmount = product.getProdPrice() * prodQuantity;
-
-					totAmount += currAmount;
-
-					if (prodQuantity > 0) {
-				%>
-
-				<tr>
-					<td><img src="./ShowImage?pid=<%=product.getProdId()%>"
-						style="width: 50px; height: 50px;"></td>
-					<td><%=product.getProdName()%></td>
-					<td><%=product.getProdPrice()%></td>
-					<td><form method="post" action="./UpdateToCart">
-							<input type="number" name="pqty" value="<%=prodQuantity%>"
-								style="max-width: 70px;" min="0"> <input type="hidden"
-								name="pid" value="<%=product.getProdId()%>"> <input
-								type="submit" name="Update" value="Update"
-								style="max-width: 80px;">
-						</form></td>
-					<td><a
-						href="cartDetails.jsp?add=1&uid=<%=userName%>&pid=<%=product.getProdId()%>&avail=<%=product.getProdQuantity()%>&qty=<%=prodQuantity%>"><i
-							class="fa fa-plus"></i></a></td>
-					<td><a
-						href="cartDetails.jsp?add=0&uid=<%=userName%>&pid=<%=product.getProdId()%>&avail=<%=product.getProdQuantity()%>&qty=<%=prodQuantity%>"><i
-							class="fa fa-minus"></i></a></td>
-					<td><%=currAmount%></td>
-				</tr>
-
-				<%
-				}
-				}
-				%>
-
-				<tr style="background-color: grey; color: white;">
-					<td colspan="6" style="text-align: center;">Total Amount to
-						Pay (in Rupees)</td>
-					<td><%=totAmount%></td>
-				</tr>
-				<%
-				if (totAmount != 0) {
-				%>
-				<tr style="background-color: grey; color: white;">
-					<td colspan="4" style="text-align: center;">
-					<td><form method="post">
-							<button formaction="userHome.jsp"
-								style="background-color: black; color: white;">Cancel</button>
-						</form></td>
-					<td colspan="2" align="center"><form method="post">
-							<button style="background-color: blue; color: white;"
-								formaction="payment.jsp?amount=<%=totAmount%>">Pay Now</button>
-						</form></td>
-
-				</tr>
-				<%
-				}
-				%>
-			</tbody>
-		</table>
+					</tr>
+					<%
+					} else {
+					%>
+					<tr style="background-color: #2c6c4b; color: white;">
+						<td colspan="6" style="text-align: right; font-weight: bold;">Tổng
+							cộng:</td>
+						<td colspan="2" style="text-align: left; font-weight: bold;"><%=total%></td>
+					</tr>
+					<%
+					}
+					%>
+				</tbody>
+			</table>
+		</div>
+		<%
+		if (carts.size() != 0) {
+		%>
+		<div class="row">
+			<div class="col-md-4 col-md-offset-4">
+				<form method="post" action="payment.jsp">
+					<button type="submit" class="btn btn-success btn-block">Thanh
+						toán</button>
+				</form>
+			</div>
+		</div>
+		<%
+		}
+		%>
 	</div>
-	<!-- ENd of Product Items List -->
-
 
 	<%@ include file="footer.html"%>
-
 </body>
 </html>

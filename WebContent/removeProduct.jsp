@@ -1,9 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
+<%@ page
+	import="com.shashi.service.impl.*, com.shashi.service.*,com.shashi.beans.*,java.util.*,javax.servlet.ServletOutputStream,java.io.*"%>
 <!DOCTYPE html>
 <html>
 <head>
-<title>Remove Product</title>
+<title>Xóa sản phẩm</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet"
@@ -23,58 +25,86 @@
 
 	if (userType == null || !userType.equals("admin")) {
 
-		response.sendRedirect("login.jsp?message=Access Denied, Login as admin!!");
+		response.sendRedirect("login.jsp?message=Truy cập bị từ chối, vui lòng đăng nhập với tư cách quản trị viên!!");
 
 	}
 
 	else if (userName == null || password == null) {
 
-		response.sendRedirect("login.jsp?message=Session Expired, Login Again!!");
+		response.sendRedirect("login.jsp?message=Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!!");
 
 	}
 	%>
 
 	<jsp:include page="header.jsp" />
 
-	<%
-	String message = request.getParameter("message");
-	%>
-	<div class="container">
-		<div class="row"
-			style="margin-top: 5px; margin-left: 2px; margin-right: 2px;">
-			<form action="./RemoveProductSrv" method="post"
-				class="col-md-4 col-md-offset-4"
-				style="border: 2px solid black; border-radius: 10px; background-color: #FFE5CC; padding: 10px;">
-				<div style="font-weight: bold;" class="text-center">
-					<h3 style="color: green;">Product Deletion Form</h3>
+	<div class="text-center"
+		style="color: green; font-size: 24px; font-weight: bold;">Xóa sản
+		phẩm</div>
+	<div class="container-fluid">
+		<div class="table-responsive ">
+			<table class="table table-hover table-sm">
+				<thead
+					style="background-color: #2c6c4b; color: white; font-size: 18px;">
+					<tr>
+						<th>Hình ảnh</th>
+						<th>Mã sản phẩm</th>
+						<th>Tên</th>
+						<th>Loại</th>
+						<th>Giá</th>
+						<th>Số lượng trong kho</th>
+						<th style="text-align: center">Thao tác</th>
+					</tr>
+				</thead>
+				<tbody style="background-color: white; font-size: 16px;">
+
+
+
 					<%
-					if (message != null) {
+					ProductServiceImpl productDao = new ProductServiceImpl();
+					List<ProductBean> products = new ArrayList<ProductBean>();
+					products = productDao.getAllProducts();
+					for (ProductBean product : products) {
 					%>
-					<p style="color: blue;">
-						<%=message%>
-					</p>
+
+					<tr>
+						<td><img src="./ShowImage?pid=<%=product.getProdId()%>"
+							style="width: 50px; height: 50px;"></td>
+						<td><%=product.getProdId()%></td>
+						<%
+						String name = product.getProdName();
+						name = name.substring(0, Math.min(name.length(), 25)) + "..";
+						%>
+						<td><%=name%></td>
+						<td><%=product.getProdType().toUpperCase()%></td>
+						<td><%=product.getProdPrice()%></td>
+						<td><%=product.getProdQuantity()%></td>
+						<td>
+							<form method="post">
+								<button type="submit"
+									formaction="./RemoveProductSrv?prodid=<%=product.getProdId()%>"
+									class="btn btn-danger">Xóa</button>
+							</form>
+						</td>
+
+					</tr>
+
 					<%
 					}
 					%>
-				</div>
-				<div></div>
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label for="last_name">Product Id</label> <input type="text"
-							placeholder="Enter Product Id" name="prodid" class="form-control"
-							id="last_name" required>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-6 text-center" style="margin-bottom: 2px;">
-						<a href="adminViewProduct.jsp" class="btn btn-info">Cancel</a>
-					</div>
-					<div class="col-md-6 text-center">
-						<button type="submit" class="btn btn-danger">Remove
-							Product</button>
-					</div>
-				</div>
-			</form>
+					<%
+					if (products.size() == 0) {
+					%>
+					<tr style="background-color: grey; color: white;">
+						<td colspan="7" style="text-align: center;">Không có sản phẩm
+							nào</td>
+
+					</tr>
+					<%
+					}
+					%>
+				</tbody>
+			</table>
 		</div>
 	</div>
 
