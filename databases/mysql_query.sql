@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS `shopping-cart`.`orders` (
   `amount` DECIMAL(10,2) NULL DEFAULT NULL,
   `shipped` INT NOT NULL DEFAULT 0,
   PRIMARY KEY (`orderid`, `prodid`),
+  UNIQUE (`orderid`),
   INDEX `productid_idx` (`prodid` ASC) VISIBLE,
   CONSTRAINT `productid`
     FOREIGN KEY (`prodid`)
