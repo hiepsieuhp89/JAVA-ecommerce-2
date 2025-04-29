@@ -1,124 +1,134 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
 <%@ page
-	import="com.shashi.service.impl.*, com.shashi.service.*,com.shashi.beans.*,java.util.*,javax.servlet.ServletOutputStream,java.io.*"%>
+	import="com.shashi.service.impl.*, com.shashi.beans.*,com.shashi.service.*,java.util.*"%>
 <!DOCTYPE html>
 <html>
 <head>
-<title>Ellison Electronics</title>
+<title>User Home</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/changes.css">
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script>
+$(document).ready(function(){
+    // Add animation to product cards
+    $('.product-card').each(function(index) {
+        $(this).delay(index * 100).addClass('fade-in');
+    });
+    
+    // Add hover effect to product cards
+    $('.product-card').hover(
+        function() {
+            $(this).css('transform', 'translateY(-5px)');
+            $(this).find('.product-image').css('transform', 'scale(1.05)');
+        },
+        function() {
+            $(this).css('transform', 'translateY(0)');
+            $(this).find('.product-image').css('transform', 'scale(1)');
+        }
+    );
+    
+    // Add hover effect to buttons
+    $('.btn').hover(
+        function() {
+            $(this).css('transform', 'translateY(-2px)');
+        },
+        function() {
+            $(this).css('transform', 'translateY(0)');
+        }
+    );
+});
+</script>
 </head>
-<body style="background-color: #E6F9E6;">
-
+<body>
 	<%
 	/* Checking the user credentials */
+	String userType = (String) session.getAttribute("usertype");
 	String userName = (String) session.getAttribute("username");
 	String password = (String) session.getAttribute("password");
 
-	if (userName == null || password == null) {
-
+	if (userType == null || !userType.equals("user")) {
+		response.sendRedirect("login.jsp?message=Access Denied, Login as user!!");
+	}
+	else if (userName == null || password == null) {
 		response.sendRedirect("login.jsp?message=Session Expired, Login Again!!");
-	}
-
-	ProductServiceImpl prodDao = new ProductServiceImpl();
-	List<ProductBean> products = new ArrayList<ProductBean>();
-
-	String search = request.getParameter("search");
-	String type = request.getParameter("type");
-	String message = "All Products";
-	if (search != null) {
-		products = prodDao.searchAllProducts(search);
-		message = "Showing Results for '" + search + "'";
-	} else if (type != null) {
-		products = prodDao.getAllProductsByType(type);
-		message = "Showing Results for '" + type + "'";
-	} else {
-		products = prodDao.getAllProducts();
-	}
-	if (products.isEmpty()) {
-		message = "No items found for the search '" + (search != null ? search : type) + "'";
-		products = prodDao.getAllProducts();
 	}
 	%>
 
-
-
 	<jsp:include page="header.jsp" />
 
-	<div class="text-center"
-		style="color: black; font-size: 14px; font-weight: bold;"><%=message%></div>
-	<!-- <script>document.getElementById('mycart').innerHTML='<i data-count="20" class="fa fa-shopping-cart fa-3x icon-white badge" style="background-color:#333;margin:0px;padding:0px; margin-top:5px;"></i>'</script>
- -->
-	<!-- Start of Product Items List -->
+	<%
+	String message = request.getParameter("message");
+	%>
+	
 	<div class="container">
-		<div class="row text-center">
-
-			<%
-			for (ProductBean product : products) {
-				int cartQty = new CartServiceImpl().getCartItemCount(userName, product.getProdId());
-			%>
-			<div class="col-sm-4" style='height: 350px;'>
-				<div class="thumbnail">
-					<img src="./ShowImage?pid=<%=product.getProdId()%>" alt="Product"
-						style="height: 150px; max-width: 180px">
-					<p class="productname"><%=product.getProdName()%>
-					</p>
-					<%
-					String description = product.getProdInfo();
-					description = description.substring(0, Math.min(description.length(), 100));
-					%>
-					<p class="productinfo"><%=description%>..
-					</p>
-					<p class="price">
-						Rs
-						<%=product.getProdPrice()%>
-					</p>
-					<form method="post">
-						<%
-						if (cartQty == 0) {
-						%>
-						<button type="submit"
-							formaction="./AddtoCart?uid=<%=userName%>&pid=<%=product.getProdId()%>&pqty=1"
-							class="btn btn-success">Add to Cart</button>
-						&nbsp;&nbsp;&nbsp;
-						<button type="submit"
-							formaction="./AddtoCart?uid=<%=userName%>&pid=<%=product.getProdId()%>&pqty=1"
-							class="btn btn-primary">Buy Now</button>
-						<%
-						} else {
-						%>
-						<button type="submit"
-							formaction="./AddtoCart?uid=<%=userName%>&pid=<%=product.getProdId()%>&pqty=0"
-							class="btn btn-danger">Remove From Cart</button>
-						&nbsp;&nbsp;&nbsp;
-						<button type="submit" formaction="cartDetails.jsp"
-							class="btn btn-success">Checkout</button>
-						<%
-						}
-						%>
-					</form>
-					<br />
+		<div class="row">
+			<div class="col-md-12">
+				<div class="card">
+					<div class="card-body">
+						<div class="text-center mb-4">
+							<h2 class="text-primary">Welcome <%=userName%></h2>
+							<%
+							if (message != null) {
+							%>
+							<div class="alert alert-info fade-in">
+								<%=message%>
+							</div>
+							<%
+							}
+							%>
+						</div>
+						
+						<div class="row">
+							<%
+							ProductServiceImpl prodDao = new ProductServiceImpl();
+							List<ProductBean> products = prodDao.getAllProducts();
+							
+							for (ProductBean product : products) {
+							%>
+							<div class="col-md-4 mb-4">
+								<div class="product-card">
+									<div class="card">
+										<div class="card-body">
+											<div class="text-center">
+												<img src="./ShowImage?pid=<%=product.getProdId()%>" 
+													class="product-image" alt="Product Image" height="200px">
+											</div>
+											<h4 class="card-title mt-3"><%=product.getProdName()%></h4>
+											<p class="card-text"><%=product.getProdInfo()%></p>
+											<div class="row">
+												<div class="col-md-6">
+													<h5 class="text-success">$<%=product.getProdPrice()%></h5>
+												</div>
+												<div class="col-md-6">
+													<h5 class="text-info">Stock: <%=product.getProdQuantity()%></h5>
+												</div>
+											</div>
+											<div class="text-center mt-3">
+												<a href="./AddToCart?pid=<%=product.getProdId()%>&price=<%=product.getProdPrice()%>" 
+													class="btn btn-primary btn-lg">Add to Cart</a>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<%
+							}
+							%>
+						</div>
+					</div>
 				</div>
 			</div>
-
-			<%
-			}
-			%>
-
 		</div>
 	</div>
-	<!-- ENd of Product Items List -->
-
 
 	<%@ include file="footer.html"%>
-
 </body>
 </html>

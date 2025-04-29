@@ -2,22 +2,50 @@
 	pageEncoding="ISO-8859-1"%>
 <%@ page
 	import="com.shashi.service.impl.*, com.shashi.beans.*,com.shashi.service.*,java.util.*"%>
-<!DOCTYPE html >
+<!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Admin Home</title>
+<title>Unshipped Items</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/changes.css">
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
-<link rel="stylesheet" href="css/changes.css">
+<script>
+$(document).ready(function(){
+    // Add animation to table rows
+    $('tr').each(function(index) {
+        $(this).delay(index * 100).addClass('fade-in');
+    });
+    
+    // Add hover effect to buttons
+    $('.btn').hover(
+        function() {
+            $(this).css('transform', 'translateY(-2px)');
+        },
+        function() {
+            $(this).css('transform', 'translateY(0)');
+        }
+    );
+    
+    // Add hover effect to ship buttons
+    $('.ship-btn').hover(
+        function() {
+            $(this).addClass('btn-success');
+        },
+        function() {
+            $(this).removeClass('btn-success');
+        }
+    );
+});
+</script>
 </head>
-<body style="background-color: #E6F9E6;">
+<body>
 	<%
 	/* Checking the user credentials */
 	String userType = (String) session.getAttribute("usertype");
@@ -25,86 +53,49 @@
 	String password = (String) session.getAttribute("password");
 
 	if (userType == null || !userType.equals("admin")) {
-
-		response.sendRedirect("loginFirst.jsp");
-
+		response.sendRedirect("login.jsp?message=Access Denied, Login as admin!!");
 	}
-
-	if (userName == null || password == null) {
-
-		response.sendRedirect("loginFirst.jsp");
+	else if (userName == null || password == null) {
+		response.sendRedirect("login.jsp?message=Session Expired, Login Again!!");
 	}
 	%>
 
 	<jsp:include page="header.jsp" />
 
-	<div class="text-center"
-		style="color: green; font-size: 24px; font-weight: bold;">UnShipped
-		Orders</div>
-	<div class="container-fluid">
-		<div class="table-responsive ">
-			<table class="table table-hover table-sm">
-				<thead
-					style="background-color: #700fb7; color: white; font-size: 16px;">
-					<tr>
-						<th>TransactionId</th>
-						<th>ProductId</th>
-						<th>User Email Id</th>
-						<th>Address</th>
-						<th>Quantity</th>
-						<th>Status</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody style="background-color: white;">
-
-					<%
-					OrderServiceImpl orderdao = new OrderServiceImpl();
-
-					List<OrderBean> orders = new ArrayList<OrderBean>();
-					orders = orderdao.getAllOrders();
-					int count = 0;
-					for (OrderBean order : orders) {
-						String transId = order.getTransactionId();
-						String prodId = order.getProductId();
-						int quantity = order.getQuantity();
-						int shipped = order.getShipped();
-						String userId = new TransServiceImpl().getUserId(transId);
-						String userAddr = new UserServiceImpl().getUserAddr(userId);
-						if (shipped == 0) {
-							count++;
-					%>
-
-					<tr>
-						<td><%=transId%></td>
-						<td><a href="./updateProduct.jsp?prodid=<%=prodId%>"><%=prodId%></a></td>
-						<td><%=userId%></td>
-						<td><%=userAddr%></td>
-						<td><%=quantity%></td>
-						<td>READY_TO_SHIP</td>
-						<td><a
-							href="ShipmentServlet?orderid=<%=order.getTransactionId()%>&amount=<%=order.getAmount()%>&userid=<%=userId%>&prodid=<%=order.getProductId()%>"
-							class="btn btn-success">SHIP NOW</a></td>
-					</tr>
-
-					<%
-					}
-					}
-					%>
-					<%
-					if (count == 0) {
-					%>
-					<tr style="background-color: grey; color: white;">
-						<td colspan="7" style="text-align: center;">No Items
-							Available</td>
-
-					</tr>
-					<%
-					}
-					%>
-
-				</tbody>
-			</table>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="card">
+					<div class="card-body">
+						<h2 class="text-center mb-4">Unshipped Items</h2>
+						
+						<div class="table-responsive">
+							<table class="table table-hover">
+								<thead class="thead-dark">
+									<tr>
+										<th>Order ID</th>
+										<th>Product ID</th>
+										<th>Product Name</th>
+										<th>Quantity</th>
+										<th>Price</th>
+										<th>Customer Name</th>
+										<th>Customer Address</th>
+										<th>Order Date</th>
+										<th>Action</th>
+									</tr>
+								</thead>
+								<tbody>
+									<!-- Add your unshipped items data here -->
+								</tbody>
+							</table>
+						</div>
+						
+						<div class="text-center mt-4">
+							<a href="adminHome.jsp" class="btn btn-primary btn-lg">Back to Admin Home</a>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 

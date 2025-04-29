@@ -1,147 +1,159 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
 <%@ page
-	import="com.shashi.service.impl.*, com.shashi.service.*,com.shashi.beans.*,java.util.*,javax.servlet.ServletOutputStream,java.io.*"%>
+	import="com.shashi.service.impl.*, com.shashi.beans.*,com.shashi.service.*,java.util.*"%>
 <!DOCTYPE html>
 <html>
 <head>
-<title>Profile Details</title>
+<title>User Profile</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/changes.css">
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
-<link rel="stylesheet"
-	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script>
+$(document).ready(function(){
+    // Add animation to form
+    $('.card').addClass('fade-in');
+    
+    // Add hover effect to buttons
+    $('.btn').hover(
+        function() {
+            $(this).css('transform', 'translateY(-2px)');
+        },
+        function() {
+            $(this).css('transform', 'translateY(0)');
+        }
+    );
+    
+    // Add focus effect to inputs
+    $('.form-control').focus(function(){
+        $(this).parent().addClass('focused');
+    }).blur(function(){
+        $(this).parent().removeClass('focused');
+    });
+});
+</script>
 </head>
-<body style="background-color: #E6F9E6;">
-
+<body>
 	<%
 	/* Checking the user credentials */
+	String userType = (String) session.getAttribute("usertype");
 	String userName = (String) session.getAttribute("username");
 	String password = (String) session.getAttribute("password");
 
-	if (userName == null || password == null) {
-
+	if (userType == null || !userType.equals("user")) {
+		response.sendRedirect("login.jsp?message=Access Denied, Login as user!!");
+	}
+	else if (userName == null || password == null) {
 		response.sendRedirect("login.jsp?message=Session Expired, Login Again!!");
 	}
-
-	UserService dao = new UserServiceImpl();
-	UserBean user = dao.getUserDetails(userName, password);
-	if (user == null)
-		user = new UserBean("Test User", 98765498765L, "test@gmail.com", "ABC colony, Patna, bihar", 87659, "lksdjf");
 	%>
-
-
 
 	<jsp:include page="header.jsp" />
 
-	<div class="container bg-secondary">
-		<div class="row">
-			<div class="col">
-				<nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4">
-					<ol class="breadcrumb mb-0">
-						<li class="breadcrumb-item"><a href="index.jsp">Home</a></li>
-						<li class="breadcrumb-item"><a href="profile.jsp">User
-								Profile</a></li>
-					</ol>
-				</nav>
-			</div>
-		</div>
-
-		<div class="row">
-			<div class="col-lg-4">
-				<div class="card mb-4">
-					<div class="card-body text-center">
-						<img src="images/profile.jpg" class="rounded-circle img-fluid"
-							style="width: 150px;">
-						<h5 class="my-3">
-							Hello
-							<%=user.getName()%>
-							here!!
-						</h5>
-						<!-- <p class="text-muted mb-1">Full Stack Developer</p>
-						<p class="text-muted mb-4">Bay Area, San Francisco, CA</p> -->
-					</div>
-				</div>
-				<div class="card mb-4 mb-lg-0">
-					<div class="card-body p-0">
-						<ul class="list-group list-group-flush rounded-3">
-
-							<li
-								class="text-center list-group-item d-flex justify-content-between align-items-center p-3">
-								<h1>My Profile</h1>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-			<div class="col-lg-8">
-				<div class="card mb-4">
+	<%
+	String message = request.getParameter("message");
+	UserServiceImpl userDao = new UserServiceImpl();
+	UserBean user = userDao.getUserDetails(userName);
+	%>
+	
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-md-8">
+				<div class="card">
 					<div class="card-body">
-						<div class="row">
-							<div class="col-sm-3">
-								<p class="mb-0">Full Name</p>
+						<div class="text-center mb-4">
+							<h2 class="text-primary">User Profile</h2>
+							<%
+							if (message != null) {
+							%>
+							<div class="alert alert-info fade-in">
+								<%=message%>
 							</div>
-							<div class="col-sm-9">
-								<p class="text-muted mb-0"><%=user.getName()%></p>
-							</div>
+							<%
+							}
+							%>
 						</div>
-						<hr>
-						<div class="row">
-							<div class="col-sm-3">
-								<p class="mb-0">Email</p>
+						
+						<form action="./UpdateProfileSrv" method="post">
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="username">Full Name</label>
+										<input type="text" class="form-control" id="username" name="username" 
+											value="<%=user.getUserName()%>" required>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="email">Email</label>
+										<input type="email" class="form-control" id="email" name="email"
+											value="<%=user.getUserEmail()%>" required>
+									</div>
+								</div>
 							</div>
-							<div class="col-sm-9">
-								<p class="text-muted mb-0"><%=user.getEmail()%>
-								</p>
+							
+							<div class="form-group">
+								<label for="address">Address</label>
+								<textarea class="form-control" id="address" name="address" 
+									rows="2" required><%=user.getUserAddress()%></textarea>
 							</div>
-						</div>
-						<hr>
-						<div class="row">
-							<div class="col-sm-3">
-								<p class="mb-0">Phone</p>
+							
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="mobile">Mobile Number</label>
+										<input type="number" class="form-control" id="mobile" name="mobile"
+											value="<%=user.getUserMobile()%>" required>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="pincode">Pin Code</label>
+										<input type="number" class="form-control" id="pincode" name="pincode"
+											value="<%=user.getUserPinCode()%>" required>
+									</div>
+								</div>
 							</div>
-							<div class="col-sm-9">
-								<p class="text-muted mb-0"><%=user.getMobile()%>
-								</p>
+							
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="password">Current Password</label>
+										<input type="password" class="form-control" id="password" name="password"
+											placeholder="Enter current password" required>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="newPassword">New Password</label>
+										<input type="password" class="form-control" id="newPassword" name="newPassword"
+											placeholder="Enter new password">
+									</div>
+								</div>
 							</div>
-						</div>
-						<hr>
-						<div class="row">
-							<div class="col-sm-3">
-								<p class="mb-0">Address</p>
+							
+							<div class="row mt-4">
+								<div class="col-md-6 text-center">
+									<a href="userHome.jsp" class="btn btn-danger btn-lg">Cancel</a>
+								</div>
+								<div class="col-md-6 text-center">
+									<button type="submit" class="btn btn-success btn-lg">Update Profile</button>
+								</div>
 							</div>
-							<div class="col-sm-9">
-								<p class="text-muted mb-0"><%=user.getAddress()%>
-								</p>
-							</div>
-						</div>
-						<hr>
-						<div class="row">
-							<div class="col-sm-3">
-								<p class="mb-0">PinCode</p>
-							</div>
-							<div class="col-sm-9">
-								<p class="text-muted mb-0"><%=user.getPinCode()%>
-								</p>
-							</div>
-						</div>
+						</form>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<br>
-	<br>
-	<br>
-
 	<%@ include file="footer.html"%>
-
 </body>
 </html>

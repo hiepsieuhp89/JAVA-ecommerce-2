@@ -1,22 +1,51 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
 <%@ page
-	import="com.shashi.service.impl.*, com.shashi.service.*,com.shashi.beans.*,java.util.*,javax.servlet.ServletOutputStream,java.io.*"%>
+	import="com.shashi.service.impl.*, com.shashi.beans.*,com.shashi.service.*,java.util.*"%>
 <!DOCTYPE html>
 <html>
 <head>
-<title>Product Stocks</title>
+<title>Admin Stock</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/changes.css">
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script>
+$(document).ready(function(){
+    // Add animation to table rows
+    $('tr').each(function(index) {
+        $(this).delay(index * 50).addClass('fade-in');
+    });
+    
+    // Add hover effect to buttons
+    $('.btn').hover(
+        function() {
+            $(this).css('transform', 'translateY(-2px)');
+        },
+        function() {
+            $(this).css('transform', 'translateY(0)');
+        }
+    );
+    
+    // Add hover effect to table rows
+    $('tr').hover(
+        function() {
+            $(this).css('transform', 'translateX(5px)');
+        },
+        function() {
+            $(this).css('transform', 'translateX(0)');
+        }
+    );
+});
+</script>
 </head>
-<body style="background-color: #E6F9E6;">
+<body>
 	<%
 	/* Checking the user credentials */
 	String userType = (String) session.getAttribute("usertype");
@@ -24,97 +53,79 @@
 	String password = (String) session.getAttribute("password");
 
 	if (userType == null || !userType.equals("admin")) {
-
 		response.sendRedirect("login.jsp?message=Access Denied, Login as admin!!");
-
 	}
-
 	else if (userName == null || password == null) {
-
 		response.sendRedirect("login.jsp?message=Session Expired, Login Again!!");
-
 	}
 	%>
 
 	<jsp:include page="header.jsp" />
 
-	<div class="text-center"
-		style="color: green; font-size: 24px; font-weight: bold;">Stock
-		Products</div>
-	<div class="container-fluid">
-		<div class="table-responsive ">
-			<table class="table table-hover table-sm">
-				<thead
-					style="background-color: #2c6c4b; color: white; font-size: 18px;">
-					<tr>
-						<th>Image</th>
-						<th>ProductId</th>
-						<th>Name</th>
-						<th>Type</th>
-						<th>Price</th>
-						<th>Sold Qty</th>
-						<th>Stock Qty</th>
-						<th colspan="2" style="text-align: center">Actions</th>
-					</tr>
-				</thead>
-				<tbody style="background-color: white; font-size: 16px;">
-
-
-
-					<%
-					ProductServiceImpl productDao = new ProductServiceImpl();
-					List<ProductBean> products = new ArrayList<ProductBean>();
-					products = productDao.getAllProducts();
-					for (ProductBean product : products) {
-					%>
-
-					<tr>
-						<td><img src="./ShowImage?pid=<%=product.getProdId()%>"
-							style="width: 50px; height: 50px;"></td>
-						<td><a
-							href="./updateProduct.jsp?prodid=<%=product.getProdId()%>"><%=product.getProdId()%></a></td>
-						<%
-						String name = product.getProdName();
-						name = name.substring(0, Math.min(name.length(), 25)) + "..";
-						%>
-						<td><%=name%></td>
-						<td><%=product.getProdType().toUpperCase()%></td>
-						<td><%=product.getProdPrice()%></td>
-						<td><%=new OrderServiceImpl().countSoldItem(product.getProdId())%></td>
-						<td><%=product.getProdQuantity()%></td>
-						<td>
-							<form method="post">
-								<button type="submit"
-									formaction="updateProduct.jsp?prodid=<%=product.getProdId()%>"
-									class="btn btn-primary">Update</button>
-							</form>
-						</td>
-						<td>
-							<form method="post">
-								<button type="submit"
-									formaction="./RemoveProductSrv?prodid=<%=product.getProdId()%>"
-									class="btn btn-danger">Remove</button>
-							</form>
-						</td>
-
-					</tr>
-
-					<%
-					}
-					%>
-					<%
-					if (products.size() == 0) {
-					%>
-					<tr style="background-color: grey; color: white;">
-						<td colspan="7" style="text-align: center;">No Items
-							Available</td>
-
-					</tr>
-					<%
-					}
-					%>
-				</tbody>
-			</table>
+	<%
+	String message = request.getParameter("message");
+	ProductServiceImpl prodDao = new ProductServiceImpl();
+	List<ProductBean> products = prodDao.getAllProducts();
+	%>
+	
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="card">
+					<div class="card-body">
+						<div class="text-center mb-4">
+							<h2 class="text-primary">Product Stock</h2>
+							<%
+							if (message != null) {
+							%>
+							<div class="alert alert-info fade-in">
+								<%=message%>
+							</div>
+							<%
+							}
+							%>
+						</div>
+						
+						<div class="table-responsive">
+							<table class="table table-striped table-hover">
+								<thead class="thead-dark">
+									<tr>
+										<th>Product ID</th>
+										<th>Product Name</th>
+										<th>Product Type</th>
+										<th>Unit Price</th>
+										<th>Stock Quantity</th>
+										<th>Action</th>
+									</tr>
+								</thead>
+								<tbody>
+									<%
+									for (ProductBean product : products) {
+									%>
+									<tr>
+										<td><%=product.getProdId()%></td>
+										<td><%=product.getProdName()%></td>
+										<td><%=product.getProdType()%></td>
+										<td>$<%=product.getProdPrice()%></td>
+										<td><%=product.getProdQuantity()%></td>
+										<td>
+											<a href="updateProduct.jsp?prodid=<%=product.getProdId()%>" 
+												class="btn btn-primary btn-sm">Update</a>
+										</td>
+									</tr>
+									<%
+									}
+									%>
+								</tbody>
+							</table>
+						</div>
+						
+						<div class="text-center mt-4">
+							<a href="adminHome.jsp" class="btn btn-secondary btn-lg">Back to Admin Home</a>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 
