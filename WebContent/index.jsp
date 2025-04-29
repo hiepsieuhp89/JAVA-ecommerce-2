@@ -88,11 +88,11 @@
 						%>
 						<button type="submit"
 							formaction="./AddtoCart?uid=<%=userName%>&pid=<%=product.getProdId()%>&pqty=1"
-							class="btn btn-success">Add to Cart</button>
+							class="btn btn-success">Thêm vào giỏ hàng</button>
 						&nbsp;&nbsp;&nbsp;
 						<button type="submit"
 							formaction="./AddtoCart?uid=<%=userName%>&pid=<%=product.getProdId()%>&pqty=1"
-							class="btn btn-primary">Buy Now</button>
+							class="btn btn-primary">Mua ngay</button>
 						<%
 						} else {
 						%>
