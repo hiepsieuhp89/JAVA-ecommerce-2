@@ -4,13 +4,39 @@
 <html>
 <head>
 <title>Login</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/changes.css">
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script>
+$(document).ready(function(){
+    // Add animation to form
+    $('.card').addClass('fade-in');
+    
+    // Add hover effect to buttons
+    $('.btn').hover(
+        function() {
+            $(this).css('transform', 'translateY(-2px)');
+        },
+        function() {
+            $(this).css('transform', 'translateY(0)');
+        }
+    );
+    
+    // Add focus effect to inputs
+    $('.form-control').focus(function(){
+        $(this).parent().addClass('focused');
+    }).blur(function(){
+        $(this).parent().removeClass('focused');
+    });
+});
+</script>
 </head>
 <body style="background-color: #E6F9E6;">
 
@@ -19,55 +45,57 @@
 	<%
 	String message = request.getParameter("message");
 	%>
+	
 	<div class="container">
-		<div class="row"
-			style="margin-top: 5px; margin-left: 2px; margin-right: 2px;">
-			<form action="./LoginSrv" method="post"
-				class="col-md-4 col-md-offset-4 col-sm-8 col-sm-offset-2"
-				style="border: 2px solid black; border-radius: 10px; background-color: #FFE5CC; padding: 10px;">
-				<div style="font-weight: bold;" class="text-center">
-					<h2 style="color: green;">Login Form</h2>
-					<%
-					if (message != null) {
-					%>
-					<p style="color: blue;">
-						<%=message%>
-					</p>
-					<%
-					}
-					%>
-				</div>
-				<div></div>
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label for="last_name">Username</label> <input type="email"
-							placeholder="Enter Username" name="username" class="form-control"
-							id="last_name" required>
+		<div class="row justify-content-center">
+			<div class="col-md-6 col-lg-4">
+				<div class="card">
+					<div class="card-body">
+						<div class="text-center mb-4">
+							<h2 class="text-primary">Login</h2>
+							<%
+							if (message != null) {
+							%>
+							<div class="alert alert-info fade-in">
+								<%=message%>
+							</div>
+							<%
+							}
+							%>
+						</div>
+						
+						<form action="./LoginSrv" method="post">
+							<div class="form-group">
+								<label for="username">Username</label>
+								<input type="email" class="form-control" id="username" 
+									name="username" placeholder="Enter your email" required>
+							</div>
+							
+							<div class="form-group">
+								<label for="password">Password</label>
+								<input type="password" class="form-control" id="password" 
+									name="password" placeholder="Enter your password" required>
+							</div>
+							
+							<div class="form-group">
+								<label for="usertype">Login As</label>
+								<select class="form-control" id="usertype" name="usertype" required>
+									<option value="customer" selected>Customer</option>
+									<option value="admin">Admin</option>
+								</select>
+							</div>
+							
+							<div class="text-center">
+								<button type="submit" class="btn btn-primary btn-lg">Login</button>
+							</div>
+							
+							<div class="text-center mt-3">
+								<p>Don't have an account? <a href="register.jsp">Register here</a></p>
+							</div>
+						</form>
 					</div>
 				</div>
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label for="last_name">Password</label> <input type="password"
-							placeholder="Enter Password" name="password" class="form-control"
-							id="last_name" required>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label for="userrole">Login As</label> <select name="usertype"
-							id="userrole" class="form-control" required>
-							<option value="customer" selected>CUSTOMER</option>
-							<option value="admin">ADMIN</option>
-						</select>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-md-12 text-center">
-						<button type="submit" class="btn btn-success">Login</button>
-					</div>
-				</div>
-			</form>
-
+			</div>
 		</div>
 	</div>
 
